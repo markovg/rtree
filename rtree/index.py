@@ -211,6 +211,9 @@ class Index(object):
             # unless the user explicitly set the property to do so
             if os.path.exists(p):
 
+                self.properties.readonly = \
+                    bool(kwargs.get('readonly', False))
+
                 self.properties.overwrite = \
                     bool(kwargs.get('overwrite', False))
 
@@ -223,8 +226,13 @@ class Index(object):
                         self.properties.index_id = 1
 
             d = os.path.dirname(p)
-            if not os.access(d, os.W_OK):
-                message = "Unable to open file '%s' for index storage" % f
+            if self.properties.readonly == True:
+                if not os.access(d, os.R_OK):
+                    message = "Unable to open index file '%s' for reading" % f
+                    raise IOError(message)
+                
+            elif not os.access(d, os.W_OK):
+                message = "Unable to open index file '%s' for read/write" % f
                 raise IOError(message)
         elif storage:
             if (major_version < 2 and minor_version < 8):
@@ -234,6 +242,7 @@ class Index(object):
 
             self.properties.storage = RT_Custom
             if storage.hasData:
+                # not sure what to do here to handle use specified "readonly"
                 self.properties.overwrite = \
                     bool(kwargs.get('overwrite', False))
                 if not self.properties.overwrite:
@@ -896,7 +905,7 @@ class Property(object):
         'custom_storage_callbacks_size', 'dat_extension', 'dimension',
         'filename', 'fill_factor', 'idx_extension', 'index_capacity',
         'index_id', 'leaf_capacity', 'near_minimum_overlap_factor',
-        'overwrite', 'pagesize', 'point_pool_capacity',
+        'overwrite', 'readonly', 'pagesize', 'point_pool_capacity',
         'region_pool_capacity', 'reinsert_factor',
         'split_distribution_factor', 'storage', 'tight_mbr', 'tpr_horizon',
         'type', 'variant', 'writethrough')
@@ -1087,6 +1096,16 @@ class Property(object):
 
     overwrite = property(get_overwrite, set_overwrite)
     """Overwrite existing index files"""
+
+    def get_readonly(self):
+        return bool(core.rt.IndexProperty_GetReadonly(self.handle))
+
+    def set_readonly(self, value):
+        value = bool(value)
+        return bool(core.rt.IndexProperty_SetReadonly(self.handle, value))
+
+    readonly = property(get_readonly, set_readonly)
+    """Access existing index files in readonly mode"""
 
     def get_near_minimum_overlap_factor(self):
         return core.rt.IndexProperty_GetNearMinimumOverlapFactor(self.handle)

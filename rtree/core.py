@@ -411,6 +411,14 @@ rt.IndexProperty_GetOverwrite.argtypes = [ctypes.c_void_p]
 rt.IndexProperty_GetOverwrite.restype = ctypes.c_int
 rt.IndexProperty_GetOverwrite.errcheck = check_value
 
+rt.IndexProperty_SetReadonly.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
+rt.IndexProperty_SetReadonly.restype = ctypes.c_int
+rt.IndexProperty_SetReadonly.errcheck = check_return
+
+rt.IndexProperty_GetReadonly.argtypes = [ctypes.c_void_p]
+rt.IndexProperty_GetReadonly.restype = ctypes.c_int
+rt.IndexProperty_GetReadonly.errcheck = check_value
+
 rt.IndexProperty_SetNearMinimumOverlapFactor.argtypes = \
     [ctypes.c_void_p, ctypes.c_uint32]
 rt.IndexProperty_SetNearMinimumOverlapFactor.restype = ctypes.c_int
